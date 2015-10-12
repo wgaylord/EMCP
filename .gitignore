@@ -2,6 +2,7 @@
 /tmp
 /mappings
 /jars
-
+/src
+*.java
 *.pyc
 

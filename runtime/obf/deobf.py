@@ -40,7 +40,7 @@ def downloadMCplusLibs(side,mcversion):
         libjson = urllib2.urlopen("http://s3.amazonaws.com/Minecraft.Download/versions/<version>/<version>.json".replace("<version>",mcversion))
         libs = json.load(libjson)["libraries"]
         libjson.close()
-        print("Searching for %s in %s" % ("libs",expanduser("~")+sysAdd+"/.minecraft/libraries"))
+        print("Searching for libraries in your .minecraft. Will download if they ar enot present")
         for x in libs:
             libinfo = x["name"].split(":")
             if "natives" in x.keys():
@@ -53,60 +53,85 @@ def downloadMCplusLibs(side,mcversion):
             else:
                 downloadLib(libinfo[0],libinfo[1],libinfo[2])
     if side == "Server" or side == "Both":
+        print("Downloading Server jar")
         downloader.DownloadZip(os.getcwd()+"/jars/"+mcversion+"-server.jar",
                                " http://s3.amazonaws.com/Minecraft.Download/versions/"+mcversion+"/minecraft_server." +
                                mcversion+".jar",mcversion + " Server Jar")
 
 
 def downloadLib(package,name,version,native=""):
-    print("Attemping to get %s from your Minecraft installation."%name)
+    #print("Attemping to get %s from your Minecraft installation."%name)
     sysAdd = ""
     if "Win" in osutils.getOS():
         sysAdd = "\\AppData\\Roaming"
     NatAdd = ""
     if downloader.isZip(os.getcwd()+"/jars/libraries/"+package.replace(".","/")+"/"+name+"/"+version+"/"+name +"-"+version+NatAdd+".jar"):
-        print("Skipped")
+        #print("Skipped")
         pass
     if native is not "":
         NatAdd = native
     lib = whereis.whereis(name +"-"+version+NatAdd+".jar",expanduser("~")+sysAdd+"/.minecraft/libraries")
     if lib is not None:
-        print("%s located at %s." % (name,lib[0]))
+       # print("%s located at %s." % (name,lib[0]))
         ssjb.file.cp(lib[0]+"/"+name +"-"+version+NatAdd+".jar",os.getcwd()+"/jars/libraries/"+package.replace(".","/")+"/"+name+"/"+version+"/"+name +"-"+version+NatAdd+".jar")
     else:
          downloader.DownloadZip(os.getcwd()+"/jars/libraries/"+package.replace(".","/")+"/"+name+"/"+version+"/"+name +"-"+version+NatAdd+".jar","https://libraries.minecraft.net/"+package.replace(".","/")+"/"+name+"/"+version+"/"+name+"-"+version+NatAdd+".jar",name)
 
 
-def downloadFernflowerAndSpecialSoruce():
-    downloader.DownloadZip(os.getcwd()+"/libs/fernflower.jar","https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/browse/bin/fernflower.jar?at=264466a4bebb5aa2b41b66c5009b098a8f2e90dc&raw","Fernflower Jar")
-    downloader.DownloadZip(os.getcwd()+"/libs/specialSoruce.jar","https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/browse/bin/SpecialSource.jar?at=c48104cb841f7e7740aced01792b5aa79bed4278&raw","SpecialSoruce Jar")
+def downloadDecompAndDeobf(Config):
+    print("Downloading Decompiler")
+    downloader.DownloadZip(os.getcwd()+"/libs/decomp.jar",Config["DecompilerUrl"],"Decompiler Jar")
+    print("Downloading De-obfuscator")
+    downloader.DownloadZip(os.getcwd()+"/libs/deobf.jar",Config["DeobfuscatorUrl"],"Deobfuscator Jar")
 
 
-def downloadMappings(maptype,mcversion,mapversion,side):
-    """Downloads the mappings.   For MCP these mappings are hosted on my github. For Engima the mappings are from
-    cuchaz's bitbucket.  The mapVersion is for MCP and Enigma  with enigma it is the commit to use and with MCP it
-    is the MCPBot snapshot to use"""
+def downloadMappings(mcversion,mapversion,side):
+    """Downloads the mappings.   For Engima the mappings are from cuchaz's bitbucket.
+    mapversion is the commit of the mappings you want."""
+    map = urllib2.urlopen("https://raw.githubusercontent.com/chibill/Minecraft-Mappings/master/Mappings/Enigma.txt")
+    versions = json.load(map)
+    map.close()
+    if side == "Client" or side == "Server":
+        downloadurl = versions[mcversion][side].replace("mapversion",mapversion)
+        downloader.DownloadFile(os.getcwd()+"/mappings/enigma-"+side.lower()+".mappings",downloadurl,"Enigma Mappings")
+    else:
+        downloadurl = versions[mcversion]["Client"].replace("mapversion",mapversion)
+        downloader.DownloadFile(os.getcwd()+"/mappings/enigma-client.mappings",downloadurl,"Enigma Mappings")
+        downloadurl2 = versions[mcversion]["Server"].replace("mapversion",mapversion)
+        downloader.DownloadFile(os.getcwd()+"/mappings/enigma-server.mappings",downloadurl2,"Enigma Mappings")
 
-    if(maptype == "Engima"):
-        pass
-    if(maptype == "MCP"):
-        try:
-            os.rmdir(os.getcwd()+"/mappings/")
-        except:
-            pass
-        downloader.DownloadFile(os.getcwd()+"/mappings/joined.srg","https://raw.githubusercontent.com/chibill/Minecraft-Mappings/master/Mappings/mcp/"+mcversion+".srg","Mappings")
 
-        if "mcp_stable" in mapversion:
-            downloader.DownloadZip(os.getcwd()+"/tmp/mapversion.zip","http://export.mcpbot.bspk.rs/mcp_stable/"+mapversion[11:]+"/"+mapversion+".zip","Extra mapping data")
-            test = zipfile.ZipFile(os.getcwd()+"/tmp/mapversion.zip")
-            test.extractall(os.getcwd()+"/mappings/")
-            test.close()
-def deobf(mapType,mcVersion,mapVersion,side):
+def deobf(mcVersion,side,Config):
     """De-obfuscates the actual files"""
+    if side == "Client":
+        os.system(Config["DeobfuscatorCommand"].replace("<path-to-deobfuscator>",os.getcwd()+"/libs/deobf.jar").replace("<in-jar>",os.getcwd()+"/jars/versions/"+mcVersion+"/"+mcVersion+".jar").replace("<out-jar>",os.getcwd()+"/tmp/client-deobf.jar").replace("<map>",os.getcwd()+"/mappings/enigma-client.mappings"))
+    if side == "Server":
+        os.system(Config["DeobfuscatorCommand"].replace("<path-to-deobfuscator>",os.getcwd()+"/libs/deobf.jar").replace("<in-jar>",os.getcwd()+"/jars/"+mcversion+"-server.jar").replace("<out-jar>",os.getcwd()+"/tmp/server-deobf.jar").replace("<map>",os.getcwd()+"/mappings/enigma-server.mappings"))
+    if side == "Both":
+        os.system(Config["DeobfuscatorCommand"].replace("<path-to-deobfuscator>",os.getcwd()+"/libs/deobf.jar").replace("<in-jar>",os.getcwd()+"/jars/versions/"+mcVersion+"/"+mcVersion+".jar").replace("<out-jar>",os.getcwd()+"/tmp/client-deobf.jar").replace("<map>",os.getcwd()+"/mappings/enigma-client.mappings"))
+        os.system(Config["DeobfuscatorCommand"].replace("<path-to-deobfuscator>",os.getcwd()+"/libs/deobf.jar").replace("<in-jar>",os.getcwd()+"/jars/"+mcversion+"-server.jar").replace("<out-jar>",os.getcwd()+"/tmp/server-deobf.jar").replace("<map>",os.getcwd()+"/mappings/enigma-server.mappings"))
 
 
-def decompile(mcVersion,side):
+def decompile(side,Config):
     """Decompiles the files"""
+    try:
+        os.makedirs(os.getcwd()+"/tmp/decomp")
+    except:
+        pass
+    if side == "Client" or side == "Both":
+        print("Decompiling Client")
+        os.system(Config["DecompilerCommand"].replace("<path-to-decompiler>",os.getcwd()+"/libs/decomp.jar").replace("<jar-in>",os.getcwd()+"/tmp/client-deobf.jar").replace("<jar-out>",os.getcwd()+"/tmp/decomp"))
+        print("Extracting Client src")
+        test = zipfile.ZipFile(os.getcwd()+"/tmp/decomp/client-deobf.jar")
+        test.extractall(os.getcwd()+"/src/minecraft/")
+        test.close()
+    if side == "Server" or side == "Both":
+        print("Decompiling Server")
+        os.system(Config["DecompilerCommand"].replace("<path-to-decompiler>",os.getcwd()+"/libs/decomp.jar").replace("<jar-in>",os.getcwd()+"/tmp/server-deobf.jar").replace("<jar-out>",os.getcwd()+"/tmp/decomp"))
+        print("Extracting Server src")
+        test = zipfile.ZipFile(os.getcwd()+"/tmp/decomp/server-deobf.jar")
+        test.extractall(os.getcwd()+"/src/minecraft-server/")
+        test.close()
 
 
 def editor(editor):

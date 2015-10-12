@@ -1,7 +1,6 @@
 import runtime.lib.ssjb as ssjb
 import runtime.obf.deobf as deobf
 import json
-import runtime.utils.osutils as osutils
 import os
 
 Config = {}
@@ -16,6 +15,7 @@ HEADER = """
 
 Created by Chibill as custom coded version of MCP.
 CMCP stands for Chibill's MCP or Custom MCP.
+Desinged for use with Enigma's mappings
 """
 
 
@@ -30,17 +30,16 @@ def deobfuscate():
 
     mcVersion = Config["MC Verson"]
     side = Config["Side"]
-    mapType = Config["Mapping Type"]
     editor = Config["Editor"]
     mapVersion = Config["Mapping Version"]
     print("""Config is targeting version %s with a side of: %s
-Using %s Mappings with there version being: %s
-The editor files will be built for: %s""" % (mcVersion, side,mapType, mapVersion, editor))
+Using Enigma Mappings with there version being: %s
+The editor files will be built for: %s""" % (mcVersion, side, mapVersion, editor))
     deobf.downloadMCplusLibs(side,mcVersion)
-    deobf.downloadFernflowerAndSpecialSoruce()
-    deobf.downloadMappings(mapType,mcVersion,mapVersion,side)
-    #deobf.deobf(mapType,mcVersion,mapVersion,side)
-    #deobf.decompile(mcVersion,side)
+    deobf.downloadDecompAndDeobf(Config)
+    deobf.downloadMappings(mcVersion,mapVersion,side)
+    deobf.deobf(mcVersion,side,Config)
+    deobf.decompile(side,Config)
     #deobf.editor(editor)
 
 
