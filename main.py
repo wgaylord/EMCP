@@ -28,7 +28,7 @@ def readconfig():
 def deobfuscate():
     """Deobfuscates Minecraft using the setting supplied in the setting file. Then decompiles it"""
 
-    mcVersion = Config["MC Verson"]
+    mcVersion = Config["MC Version"]
     side = Config["Side"]
     editor = Config["Editor"]
     mapVersion = Config["Mapping Version"]
@@ -40,6 +40,7 @@ The editor files will be built for: %s""" % (mcVersion, side, mapVersion, editor
     deobf.downloadMappings(mcVersion,mapVersion,side)
     deobf.deobf(mcVersion,side,Config)
     deobf.decompile(side,Config)
+    #deobf.cleanup_src()
     #deobf.editor(editor)
 
 

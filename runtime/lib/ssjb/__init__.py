@@ -40,6 +40,7 @@ def mainTask():
 
 # set up the default tasks task
 def tasksTask():
+    """Lists all the available tasks"""
     print ("Listing all registered tasks.")
     print ("Name :  Description")
     for x in tasks.keys():

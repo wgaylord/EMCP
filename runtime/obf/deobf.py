@@ -8,6 +8,7 @@ import runtime.lib.ssjb.file
 import runtime.lib.ssjb as ssjb
 import runtime.utils.osutils as osutils
 from os.path import expanduser
+import runtime.utils.cleanup_src as cs
 
 def downloadMCplusLibs(side,mcversion):
     print("Preparing to get Minecraft jar and its libs")
@@ -132,7 +133,10 @@ def decompile(side,Config):
         test = zipfile.ZipFile(os.getcwd()+"/tmp/decomp/server-deobf.jar")
         test.extractall(os.getcwd()+"/src/minecraft-server/")
         test.close()
-
+def cleanup_src():
+    print("Cleaning up the src a bit")
+    cs.cleanup_src(os.getcwd()+"/src/",clean_src=False)
 
 def editor(editor):
     """Generates the editor related files"""
+    print("Generating editor related files")

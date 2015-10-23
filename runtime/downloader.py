@@ -39,6 +39,7 @@ def DownloadZip(SaveLoc,DownloadURL,Item,Canskip=True):
       #  sys.stdout.flush()
     else:
         print("Fetching "+Item+" - SKIPPED")
+    print("\n")
 
 def DownloadFile(SaveLoc,DownloadURL,Item):
     print("Preparing to download - "+ Item)
@@ -52,4 +53,4 @@ def DownloadFile(SaveLoc,DownloadURL,Item):
     sys.stdout.write('\rFetching ' + Item  + '...\n')
     urllib.urlretrieve(DownloadURL,SaveLoc , reporthook=report)
     sys.stdout.flush()
-    print("")
+    print("\n")
