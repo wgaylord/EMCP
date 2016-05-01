@@ -3,50 +3,57 @@ import runtime.obf.deobf as deobf
 import json
 import os
 
+#Used for testing new mappings and also making new ones.
+SkipMappingDownload = True
+
+#Will skip patching of the files if I ever have to do patching
+SkipPatching = False
+
 Config = {}
 
 HEADER = """
-  _____ __  __  _____ _____
- / ____|  \/  |/ ____|  __ \.
-| |    | \  / | |    | |__) |
-| |    | |\/| | |    |  ___/
-| |____| |  | | |____| |
- \_____|_|  |_|\_____|_|
+ .----------------.  .----------------.  .----------------.  .----------------.
+| .--------------. || .--------------. || .--------------. || .--------------. |
+| |  _________   | || | ____    ____ | || |     ______   | || |   ______     | |
+| | |_   ___  |  | || ||_   \  /   _|| || |   .' ___  |  | || |  |_   __ \   | |
+| |   | |_  \_|  | || |  |   \/   |  | || |  / .'   \_|  | || |    | |__) |  | |
+| |   |  _|  _   | || |  | |\  /| |  | || |  | |         | || |    |  ___/   | |
+| |  _| |___/ |  | || | _| |_\/_| |_ | || |  \ `.___.'\  | || |   _| |_      | |
+| | |_________|  | || ||_____||_____|| || |   `._____.'  | || |  |_____|     | |
+| |              | || |              | || |              | || |              | |
+| '--------------' || '--------------' || '--------------' || '--------------' |
+ '----------------'  '----------------'  '----------------'  '----------------'
 
-Created by Chibill as custom coded version of MCP.
-CMCP stands for Chibill's MCP or Custom MCP.
+Created by Chibill as replacement for MCP
+EMCP stands for Enigma Minecraft Coder Pack.
 Desinged for use with Enigma's mappings
 """
 
 
-def readconfig():
-    global Config
-    config = open(os.getcwd()+"/config.conf")
-    Config = json.load(config)
-    config.close()
+def read_config(rel_path="config.conf"):
+    with open(os.path.join(os.getcwd(), rel_path)) as in_file:
+        return json.load(in_file)
 
 def deobfuscate():
     """Deobfuscates Minecraft using the setting supplied in the setting file. Then decompiles it"""
 
-    mcVersion = Config["MC Version"]
+    print("""Config is targeting version {MC Verson} with a side of: {Side}
+Using Enigma Mappings with there version being: {Mapping Version}
+The editor files will be built for: {Editor}""".format(**Config))
+    mcVersion = Config["MC Verson"]
     side = Config["Side"]
-    editor = Config["Editor"]
-    mapVersion = Config["Mapping Version"]
-    print("""Config is targeting version %s with a side of: %s
-Using Enigma Mappings with there version being: %s
-The editor files will be built for: %s""" % (mcVersion, side, mapVersion, editor))
-    deobf.downloadMCplusLibs(side,mcVersion)
+    deobf.downloadMCplusLibs(side, mcVersion)
     deobf.downloadDecompAndDeobf(Config)
-    deobf.downloadMappings(mcVersion,mapVersion,side)
-    deobf.deobf(mcVersion,side,Config)
-    deobf.decompile(side,Config)
-    #deobf.cleanup_src()
-    #deobf.editor(editor)
+    deobf.downloadMappings(mcVersion, Config["Mapping Version"], side)
+    deobf.deobf(mcVersion, side, Config)
+    deobf.decompile(side, Config)
+    deobf.cleanup_src()
+    # deobf.editor(Config["Editor"])
 
 
 if __name__ == "__main__":
     print(HEADER)
     print("Reading Config")
-    readconfig()
+    Config = read_config()
     ssjb.registerTask("deobf",deobfuscate)
     ssjb.run()

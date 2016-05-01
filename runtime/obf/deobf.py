@@ -8,6 +8,7 @@ import runtime.lib.ssjb.file
 import runtime.lib.ssjb as ssjb
 import runtime.utils.osutils as osutils
 from os.path import expanduser
+import shutil
 import runtime.utils.cleanup_src as cs
 
 def downloadMCplusLibs(side,mcversion):
@@ -35,7 +36,8 @@ def downloadMCplusLibs(side,mcversion):
             print("Client jar not loacted attemping to download.")
             try:
                 downloader.DownloadZip(os.getcwd()+"/jars/versions/"+mcversion+"/"+mcversion+".jar","http://s3.amazonaws.com/Minecraft.Download/versions/" + mcversion+"/"+mcversion+".jar",mcversion + " Client Jar")
-            except:
+            except Exception as e:
+                print e
                 print("Download failed. Please check your internet connection.")
                 exit(-1)
         libjson = urllib2.urlopen("http://s3.amazonaws.com/Minecraft.Download/versions/<version>/<version>.json".replace("<version>",mcversion))
@@ -61,7 +63,7 @@ def downloadMCplusLibs(side,mcversion):
 
 
 def downloadLib(package,name,version,native=""):
-    #print("Attemping to get %s from your Minecraft installation."%name)
+    print("Attemping to get %s from your Minecraft installation."%name)
     sysAdd = ""
     if "Win" in osutils.getOS():
         sysAdd = "\\AppData\\Roaming"
@@ -73,7 +75,7 @@ def downloadLib(package,name,version,native=""):
         NatAdd = native
     lib = whereis.whereis(name +"-"+version+NatAdd+".jar",expanduser("~")+sysAdd+"/.minecraft/libraries")
     if lib is not None:
-       # print("%s located at %s." % (name,lib[0]))
+        #print("%s located at %s." % (name,lib[0]))
         ssjb.file.cp(lib[0]+"/"+name +"-"+version+NatAdd+".jar",os.getcwd()+"/jars/libraries/"+package.replace(".","/")+"/"+name+"/"+version+"/"+name +"-"+version+NatAdd+".jar")
     else:
          downloader.DownloadZip(os.getcwd()+"/jars/libraries/"+package.replace(".","/")+"/"+name+"/"+version+"/"+name +"-"+version+NatAdd+".jar","https://libraries.minecraft.net/"+package.replace(".","/")+"/"+name+"/"+version+"/"+name+"-"+version+NatAdd+".jar",name)
@@ -89,7 +91,7 @@ def downloadDecompAndDeobf(Config):
 def downloadMappings(mcversion,mapversion,side):
     """Downloads the mappings.   For Engima the mappings are from cuchaz's bitbucket.
     mapversion is the commit of the mappings you want."""
-    map = urllib2.urlopen("https://raw.githubusercontent.com/chibill/Minecraft-Mappings/master/Mappings/Enigma.txt")
+    map = urllib2.urlopen("https://minecraft16.ml/enigma.json")
     versions = json.load(map)
     map.close()
     if side == "Client" or side == "Server":
@@ -116,6 +118,10 @@ def deobf(mcVersion,side,Config):
 def decompile(side,Config):
     """Decompiles the files"""
     try:
+        shutil.rmtree(os.getcwd()+"/src")
+    except:
+        pass
+    try:
         os.makedirs(os.getcwd()+"/tmp/decomp")
     except:
         pass
@@ -135,7 +141,7 @@ def decompile(side,Config):
         test.close()
 def cleanup_src():
     print("Cleaning up the src a bit")
-    cs.cleanup_src(os.getcwd()+"/src/",clean_src=False)
+    cs.strip_comments(os.getcwd()+"/src/")
 
 def editor(editor):
     """Generates the editor related files"""

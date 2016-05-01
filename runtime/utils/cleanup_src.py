@@ -38,7 +38,7 @@ def strip_comments(src_dir):
             buf = regexps['comments'].sub(comment_replacer, buf)
             buf = regexps['trailing'].sub(r'', buf)
             buf = regexps['newlines'].sub(r'\n', buf)
-
+            
             with open(tmp_file, 'w') as fh:
                 fh.write(buf)
             shutil.move(tmp_file, src_file)
