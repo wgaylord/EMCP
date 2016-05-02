@@ -26,13 +26,14 @@ HEADER = """
 
 Created by Chibill as replacement for MCP
 EMCP stands for Enigma Minecraft Coder Pack.
-Desinged for use with Enigma's mappings
+Designed for use with Enigma's mappings
 """
 
 
 def read_config(rel_path="config.conf"):
     with open(os.path.join(os.getcwd(), rel_path)) as in_file:
         return json.load(in_file)
+
 
 def deobfuscate():
     """Deobfuscates Minecraft using the setting supplied in the setting file. Then decompiles it"""
