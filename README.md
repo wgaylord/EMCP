@@ -10,6 +10,6 @@ Does not currently work because I have not yet put onto my server the one file t
 * [x] Clean up the src a bit
 
 #TODO
-* __Set up hosting of enigma.json__
-* Get patching working
-* Get reobfuscation working
+* [ ] __Set up hosting of enigma.json__
+* [ ] Get patching working
+* [ ] Get reobfuscation working
