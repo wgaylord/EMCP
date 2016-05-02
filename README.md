@@ -1,18 +1,15 @@
-#EMCP
-
-Enigma Minecraft Coder Pack
+# Enigma Minecraft Coder Pack (EMCP)
 
 Basiclly MCP for Enigma mappings.
-Currently will not work as I have not set the one file I need to be hosted on my server/
 
-
+Does not currently work because I have not yet put onto my server the one file that I need to be hosted.
 
 #FINISHED
-Downloads
-Decompiles
-Clean up the src a bit
+* [x] Downloads
+* [x] Decompiles
+* [x] Clean up the src a bit
 
 #TODO
-##Set up hosting of enigma.json
-Get patching working
-Get reobfuscation working
+* __Set up hosting of enigma.json__
+* Get patching working
+* Get reobfuscation working
